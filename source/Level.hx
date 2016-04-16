@@ -155,6 +155,8 @@ class Level extends FlxGroup {
     if (player.walking) {
       return;
     }
+    var oldX = player.mapX;
+    var oldY = player.mapY;
     var newX = player.mapX + dx;
     var newY = player.mapY + dy;
     if (newX < 0 || newX >= map.width || newY < 0 || newY >= map.height) {
@@ -185,6 +187,12 @@ class Level extends FlxGroup {
     for (shifter in shifters) {
       if (shifter.isAt(newX, newY)) {
         player.shiftShape(shifter.shape);
+        if (player.shape != Shape.HUMAN) {
+          for (obj in player.carried) {
+            obj.setMapPosition(oldX, oldY);
+            player.carried.remove(obj);
+          }
+        }
       }
     }
 

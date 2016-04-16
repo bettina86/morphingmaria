@@ -29,6 +29,12 @@ class MapObject extends FlxSprite {
     animation.add(name, frames, 10, true, flipX != null && flipX);
   }
 
+  public function setMapPosition(mapX: Int, mapY: Int) {
+    this.mapX = mapX;
+    this.mapY = mapY;
+    this.setPosition(mapX * Level.TILE_SIZE, mapY * Level.TILE_SIZE);
+  }
+
   public function isAt(x: Int, y: Int): Bool {
     return mapX == x && mapY == y;
   }
