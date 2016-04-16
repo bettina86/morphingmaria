@@ -11,6 +11,7 @@ import flixel.addons.editors.tiled.TiledTileSet;
 import flixel.math.FlxPoint;
 import flixel.tile.FlxTilemap;
 import flixel.group.FlxGroup;
+import flixel.text.FlxText;
 import haxe.io.Path;
 
 class Level extends FlxGroup {
@@ -28,6 +29,7 @@ class Level extends FlxGroup {
   private var crates: FlxTypedGroup<Crate> = new FlxTypedGroup<Crate>();
   private var exits: FlxTypedGroup<Exit> = new FlxTypedGroup<Exit>();
   private var shifters: FlxTypedGroup<Shifter> = new FlxTypedGroup<Shifter>();
+  private var hints: FlxGroup = new FlxGroup();
   private var overlay: FlxSprite;
 
   public function new(number: Int) {
@@ -43,7 +45,12 @@ class Level extends FlxGroup {
     createObjects(this.map);
     add(keys);
     add(shifters);
+    add(hints);
     addOverlay();
+
+    if (number == 1) {
+      showHint("Use the arrow keys to move");
+    }
   }
 
   public function fadeIn(onComplete: Void -> Void = null) {
@@ -168,10 +175,14 @@ class Level extends FlxGroup {
 
     player.moveTo(newX, newY);
 
-    if (player.shape == Shape.HUMAN) {
-      for (key in keys) {
-        if (key.mapX == newX && key.mapY == newY) {
+    for (key in keys) {
+      if (key.mapX == newX && key.mapY == newY) {
+        if (player.shape == Shape.HUMAN) {
           player.pickUp(key);
+        } else if (player.shape == Shape.BEAR) {
+          showHint("Your paws are too big to hold this key");
+        } else if (player.shape == Shape.SNAKE) {
+          showHint("You have no hands to hold this key");
         }
       }
     }
@@ -210,7 +221,7 @@ class Level extends FlxGroup {
     if (player.shape == Shape.BEAR) {
       pushAnyCrates(mapX, mapY, dx, dy);
     }
-    return isFree(mapX, mapY, player.shape == Shape.SNAKE);
+    return isFree(mapX, mapY, true);
   }
 
   private function openAnyDoors(mapX: Int, mapY: Int) {
@@ -313,24 +324,41 @@ class Level extends FlxGroup {
     }
   }
 
-  private function isFree(mapX: Int, mapY: Int, ignoreDoors: Bool = false) {
+  private function isFree(mapX: Int, mapY: Int, forPlayer: Bool = false) {
     var tile = map.getTile(mapX, mapY);
     if (tile != 1) {
       return false;
     }
-    if (!ignoreDoors) {
-      for (door in doors) {
-        if (door.isAt(mapX, mapY) && !door.open) {
+    for (door in doors) {
+      if (door.isAt(mapX, mapY) && !door.open) {
+        if (forPlayer && player.shape != Shape.SNAKE) {
+          showHint("You are too big to fit under the door");
           return false;
         }
       }
     }
     for (crate in crates) {
       if (crate.isAt(mapX, mapY)) {
+        if (forPlayer) {
+          showHint("You are not strong enough to move this crate");
+        }
         return false;
       }
     }
     return true;
+  }
+
+  private function showHint(hint: String) {
+    hints.clear();
+
+    var margin = 8;
+    var text = new FlxText(margin, 256 - margin - 8, 256 - 2 * margin, hint);
+    text.alignment = CENTER;
+    text.borderStyle = SHADOW;
+    hints.add(text);
+    haxe.Timer.delay(function() {
+      FlxTween.tween(text, {alpha: 0.0}, 1.0, {onComplete: function(tween: FlxTween) { hints.remove(text); }});
+    }, 2000);
   }
 }
 
