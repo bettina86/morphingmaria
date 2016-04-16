@@ -7,6 +7,7 @@ import flixel.FlxObject;
 class Player extends MapObject {
 
   public var tweening: Bool;
+  public var carried: Array<MapObject> = [];
 
   public function new(mapX: Int, mapY: Int) {
     super(mapX, mapY, 20, 9);
@@ -62,6 +63,29 @@ class Player extends MapObject {
         return "up";
       case FlxObject.DOWN:
         return "down";
+      default:
+        return "ERROR";
     }
+  }
+
+  public override function update(elapsed: Float) {
+    super.update(elapsed);
+    for (obj in carried) {
+      obj.x = this.x + 3;
+      obj.y = this.y - 7;
+    }
+  }
+
+  public function pickUp(obj: MapObject) {
+    carried.push(obj);
+  }
+
+  public function getCarriedKey(): Key {
+    for (obj in carried) {
+      if (Std.is(obj, Key)) {
+        return cast obj;
+      }
+    }
+    return null;
   }
 }

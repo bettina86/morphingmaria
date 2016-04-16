@@ -23,6 +23,8 @@ class Level extends FlxGroup {
 
   private var map: FlxTilemap;
   private var player: Player;
+  private var keys: Array<Key> = [];
+  private var doors: Array<Door> = [];
   private var exit: MapObject;
 
   public function new(number: Int) {
@@ -63,7 +65,9 @@ class Level extends FlxGroup {
   private function makeOverlay(): FlxSprite {
     var overlay = new FlxSprite();
     overlay.makeGraphic(256, 256, FlxColor.BLACK);
-    add(overlay);
+    // add(overlay);
+    members.push(overlay);
+    length++;
     return overlay;
   }
 
@@ -88,14 +92,21 @@ class Level extends FlxGroup {
     switch (type) {
       case 0:
         return;
+      case 3:
+      case 5:
+        var door = new Door(mapX, mapY, type == 5);
+        add(door);
+        doors.push(door);
       case 11:
         player = new Player(mapX, mapY);
         add(player);
       case 12:
         exit = new MapObject(mapX, mapY, 11, 1);
-        exit.animation.add("default", [0]);
-        exit.animation.play("default");
         add(exit);
+      case 13:
+        var key = new Key(mapX, mapY);
+        add(key);
+        keys.push(key);
       default:
         trace("Don't know what to do with tile ID " + type);
     }
@@ -141,6 +152,13 @@ class Level extends FlxGroup {
     }
     player.moveTo(newX, newY);
 
+    for (key in keys) {
+      if (key.mapX == newX && key.mapY == newY) {
+        keys.remove(key);
+        player.pickUp(key);
+      }
+    }
+
     if (newX == exit.mapX && newY == exit.mapY) {
       finished = true;
     }
@@ -148,6 +166,20 @@ class Level extends FlxGroup {
 
   private function isPassable(mapX: Int, mapY: Int) {
     var tile = map.getTile(mapX, mapY);
-    return tile == 1;
+    if (tile != 1) {
+      return false;
+    }
+    for (door in doors) {
+      if (door.mapX == mapX && door.mapY == mapY && !door.open) {
+        var key = player.getCarriedKey();
+        if (key == null) {
+          return false;
+        }
+        player.carried.remove(key);
+        remove(key);
+        door.setOpen(true);
+      }
+    }
+    return true;
   }
 }
