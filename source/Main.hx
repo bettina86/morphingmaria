@@ -8,7 +8,11 @@ class Main extends Sprite {
 
 	public function new() {
 		super();
-		addChild(new FlxGame(800, 600, GameState, true));
+
+		addChild(new FlxGame(256, 256, GameState, true));
+
+    FlxG.scaleMode = new flixel.system.scaleModes.PixelPerfectScaleMode();
+    FlxG.camera.pixelPerfectRender = true;
     FlxG.mouse.useSystemCursor = true;
 	}
 }

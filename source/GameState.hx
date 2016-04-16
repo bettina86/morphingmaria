@@ -10,4 +10,11 @@ import flixel.input.keyboard.FlxKey;
 import flixel.input.mouse.FlxMouseEventManager;
 
 class GameState extends FlxState {
+
+  private var level: Level;
+
+  override public function create(): Void {
+    level = new Level(1);
+    add(level);
+  }
 }
