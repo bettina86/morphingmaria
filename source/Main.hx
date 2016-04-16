@@ -9,7 +9,7 @@ class Main extends Sprite {
 	public function new() {
 		super();
 
-		addChild(new FlxGame(256, 256, GameState, true));
+		addChild(new FlxGame(320, 256, GameState, true));
 
     FlxG.scaleMode = new flixel.system.scaleModes.PixelPerfectScaleMode();
     FlxG.camera.pixelPerfectRender = true;

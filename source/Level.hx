@@ -15,11 +15,17 @@ class Level extends FlxGroup {
   public inline static var TILE_SIZE = 16;
   public static var TILE_SIZE_POINT = new FlxPoint(TILE_SIZE, TILE_SIZE);
 
+  public var number: Int;
+  public var finished: Bool;
+
   private var map: FlxTilemap;
   private var player: Player;
+  private var exit: MapObject;
 
   public function new(number: Int) {
     super();
+
+    this.number = number;
 
     var filename = "assets/levels/level" + number + ".tmx";
     var map = new TiledMap(filename);
@@ -27,7 +33,7 @@ class Level extends FlxGroup {
     createTiles(cast map.getLayer("base"));
     createObjects(cast map.getLayer("objects"));
 
-    FlxG.camera.focusOn(new FlxPoint(map.fullWidth / 2, map.fullHeight / 2));
+    // FlxG.camera.focusOn(new FlxPoint(map.fullWidth / 2, map.fullHeight / 2));
   }
 
   private function createTiles(layer: TiledTileLayer) {
@@ -56,6 +62,10 @@ class Level extends FlxGroup {
       case 11:
         player = new Player(mapX, mapY);
         add(player);
+      case 12:
+        exit = new MapObject(mapX, mapY);
+        exit.setFrameIndices(11, 1);
+        add(exit);
       default:
         trace("Don't know what to do with tile ID " + type);
     }
@@ -63,6 +73,10 @@ class Level extends FlxGroup {
 
   override public function update(elapsed: Float): Void {
     super.update(elapsed);
+
+    if (finished) {
+      return;
+    }
 
     var dx = 0;
     var dy = 0;
@@ -96,6 +110,10 @@ class Level extends FlxGroup {
       return;
     }
     player.moveTo(newX, newY);
+
+    if (newX == exit.mapX && newY == exit.mapY) {
+      finished = true;
+    }
   }
 
   private function isPassable(mapX: Int, mapY: Int) {
