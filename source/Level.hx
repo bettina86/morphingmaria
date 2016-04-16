@@ -47,7 +47,7 @@ class Level extends FlxGroup {
   }
 
   public function fadeIn(onComplete: Void -> Void = null) {
-    FlxTween.tween(overlay, {alpha: 0.0}, 1.0, {onComplete: function(tween: FlxTween) {
+    FlxTween.tween(overlay, {alpha: 0.0}, 0.5, {onComplete: function(tween: FlxTween) {
       if (onComplete != null) {
         onComplete();
       }
@@ -56,7 +56,7 @@ class Level extends FlxGroup {
 
   public function fadeOut(onComplete: Void -> Void = null) {
     overlay.alpha = 0;
-    FlxTween.tween(overlay, {alpha: 1.0}, 1.0, {onComplete: function(tween: FlxTween) {
+    FlxTween.tween(overlay, {alpha: 1.0}, 0.5, {onComplete: function(tween: FlxTween) {
       if (onComplete != null) {
         onComplete();
       }
