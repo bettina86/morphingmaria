@@ -1,6 +1,9 @@
 package;
 
 import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.util.FlxColor;
+import flixel.tweens.FlxTween;
 import flixel.addons.editors.tiled.TiledMap;
 import flixel.addons.editors.tiled.TiledLayer.TiledLayerType;
 import flixel.addons.editors.tiled.TiledTileLayer;
@@ -36,6 +39,34 @@ class Level extends FlxGroup {
     // FlxG.camera.focusOn(new FlxPoint(map.fullWidth / 2, map.fullHeight / 2));
   }
 
+  public function fadeIn(onComplete: Void -> Void = null) {
+    var overlay = makeOverlay();
+    FlxTween.tween(overlay, {alpha: 0.0}, 1.0, {onComplete: function(tween: FlxTween) {
+      remove(overlay);
+      if (onComplete != null) {
+        onComplete();
+      }
+    }});
+  }
+
+  public function fadeOut(onComplete: Void -> Void = null) {
+    var overlay = makeOverlay();
+    overlay.alpha = 0;
+    FlxTween.tween(overlay, {alpha: 1.0}, 1.0, {onComplete: function(tween: FlxTween) {
+      remove(overlay);
+      if (onComplete != null) {
+        onComplete();
+      }
+    }});
+  }
+
+  private function makeOverlay(): FlxSprite {
+    var overlay = new FlxSprite();
+    overlay.makeGraphic(256, 256, FlxColor.BLACK);
+    add(overlay);
+    return overlay;
+  }
+
   private function createTiles(layer: TiledTileLayer) {
     var tilemap: FlxTilemap = new FlxTilemap();
     tilemap.loadMapFromArray(layer.tileArray, layer.width, layer.height,
@@ -48,9 +79,7 @@ class Level extends FlxGroup {
     for (y in 0...layer.height) {
       for (x in 0...layer.width) {
         var tile = layer.tileArray[y * layer.height + x];
-        if (tile != null) {
-          createObject(tile, x, y);
-        }
+        createObject(tile, x, y);
       }
     }
   }
@@ -63,8 +92,9 @@ class Level extends FlxGroup {
         player = new Player(mapX, mapY);
         add(player);
       case 12:
-        exit = new MapObject(mapX, mapY);
-        exit.setFrameIndices(11, 1);
+        exit = new MapObject(mapX, mapY, 11, 1);
+        exit.animation.add("default", [0]);
+        exit.animation.play("default");
         add(exit);
       default:
         trace("Don't know what to do with tile ID " + type);

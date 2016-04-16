@@ -33,6 +33,7 @@ class GameState extends FlxState {
     add(hud);
 
     switchLevel(levelReached);
+    level.fadeIn();
   }
 
   private function updateLevelButtons() {
@@ -82,11 +83,12 @@ class GameState extends FlxState {
     if (endingLevel) {
       return;
     }
+    endingLevel = true;
     haxe.Timer.delay(function() {
-      FlxG.camera.fade(FlxColor.BLACK, 1.0, false, function() {
+      level.fadeOut(function() {
         switchLevel(number);
         endingLevel = false;
-        FlxG.camera.fade(FlxColor.BLACK, 1.0, true);
+        level.fadeIn();
       });
     }, delay);
   }
