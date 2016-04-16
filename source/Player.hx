@@ -77,6 +77,8 @@ class Player extends MapObject {
   }
 
   public function pickUp(obj: MapObject) {
+    obj.mapX = -1;
+    obj.mapY = -1;
     carried.push(obj);
   }
 

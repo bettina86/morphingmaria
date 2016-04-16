@@ -24,10 +24,11 @@ class Level extends FlxGroup {
   private var map: FlxTilemap;
   private var wires: FlxTilemap;
   private var player: Player;
-  private var keys: Array<Key> = [];
-  private var doors: Array<Door> = [];
-  private var crates: Array<Crate> = [];
-  private var exit: MapObject;
+  private var keys: FlxTypedGroup<Key> = new FlxTypedGroup<Key>();
+  private var doors: FlxTypedGroup<Door> = new FlxTypedGroup<Door>();
+  private var crates: FlxTypedGroup<Crate> = new FlxTypedGroup<Crate>();
+  private var exits: FlxTypedGroup<Exit> = new FlxTypedGroup<Exit>();
+  private var overlay: FlxSprite;
 
   public function new(number: Int) {
     super();
@@ -36,18 +37,18 @@ class Level extends FlxGroup {
 
     var filename = "assets/levels/level" + number + ".tmx";
     var map = new TiledMap(filename);
-
     createTiles(cast map.getLayer("base"));
     createWires(cast map.getLayer("wires"));
+    add(doors);
+    add(exits);
+    add(crates);
     createObjects(cast map.getLayer("objects"));
-
-    // FlxG.camera.focusOn(new FlxPoint(map.fullWidth / 2, map.fullHeight / 2));
+    add(keys);
+    addOverlay();
   }
 
   public function fadeIn(onComplete: Void -> Void = null) {
-    var overlay = makeOverlay();
     FlxTween.tween(overlay, {alpha: 0.0}, 1.0, {onComplete: function(tween: FlxTween) {
-      remove(overlay);
       if (onComplete != null) {
         onComplete();
       }
@@ -55,23 +56,18 @@ class Level extends FlxGroup {
   }
 
   public function fadeOut(onComplete: Void -> Void = null) {
-    var overlay = makeOverlay();
     overlay.alpha = 0;
     FlxTween.tween(overlay, {alpha: 1.0}, 1.0, {onComplete: function(tween: FlxTween) {
-      remove(overlay);
       if (onComplete != null) {
         onComplete();
       }
     }});
   }
 
-  private function makeOverlay(): FlxSprite {
-    var overlay = new FlxSprite();
+  private function addOverlay() {
+    overlay = new FlxSprite();
     overlay.makeGraphic(256, 256, FlxColor.BLACK);
-    // add(overlay);
-    members.push(overlay);
-    length++;
-    return overlay;
+    add(overlay);
   }
 
   private function createTiles(layer: TiledTileLayer) {
@@ -109,21 +105,19 @@ class Level extends FlxGroup {
       case 5:
         var door = new Door(mapX, mapY, type == 5);
         add(door);
-        doors.push(door);
+        doors.add(door);
       case 9:
         var crate = new Crate(mapX, mapY);
-        add(crate);
-        crates.push(crate);
+        crates.add(crate);
       case 11:
         player = new Player(mapX, mapY);
         add(player);
       case 12:
-        exit = new MapObject(mapX, mapY, 11, 1);
-        add(exit);
+        var exit = new Exit(mapX, mapY);
+        exits.add(exit);
       case 13:
         var key = new Key(mapX, mapY);
-        add(key);
-        keys.push(key);
+        keys.add(key);
       default:
         trace("Don't know what to do with tile ID " + type);
     }
@@ -172,7 +166,6 @@ class Level extends FlxGroup {
 
     for (key in keys) {
       if (key.mapX == newX && key.mapY == newY) {
-        keys.remove(key);
         player.pickUp(key);
       }
     }
@@ -183,8 +176,10 @@ class Level extends FlxGroup {
       }
     }
 
-    if (newX == exit.mapX && newY == exit.mapY) {
-      finished = true;
+    for (exit in exits) {
+      if (newX == exit.mapX && newY == exit.mapY) {
+        finished = true;
+      }
     }
   }
 
@@ -202,7 +197,7 @@ class Level extends FlxGroup {
     for (door in doors) {
       if (door.mapX == mapX && door.mapY == mapY && !door.open) {
         player.carried.remove(key);
-        remove(key);
+        keys.remove(key);
         door.setOpen(true);
       }
     }
