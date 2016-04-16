@@ -104,9 +104,11 @@ class Player extends MapObject {
 
   public override function update(elapsed: Float) {
     super.update(elapsed);
+    var offset = 0;
     for (obj in carried) {
-      obj.x = this.x + 3;
-      obj.y = this.y - 7;
+      obj.x = this.x + 3 + offset;
+      obj.y = this.y - 7 - offset;
+      offset += 2;
     }
   }
 

@@ -48,6 +48,8 @@ class Level extends FlxGroup {
     add(hints);
     addOverlay();
 
+    updateWires();
+
     if (number == 1) {
       showHint("Use the arrow keys to move");
     }
@@ -340,7 +342,9 @@ class Level extends FlxGroup {
     for (crate in crates) {
       if (crate.isAt(mapX, mapY)) {
         if (forPlayer) {
-          showHint("You are not strong enough to move this crate");
+          if (player.shape != Shape.BEAR) {
+            showHint("You are not strong enough to move this crate");
+          }
         }
         return false;
       }
