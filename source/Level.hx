@@ -40,7 +40,7 @@ class Level extends FlxGroup {
     add(doors);
     add(exits);
     add(crates);
-    createObjects(cast map.getLayer("objects"));
+    createObjects(this.map);
     add(keys);
     add(shifters);
     addOverlay();
@@ -87,19 +87,20 @@ class Level extends FlxGroup {
     add(tilemap);
   }
 
-  private function createObjects(layer: TiledTileLayer) {
-    for (y in 0...layer.height) {
-      for (x in 0...layer.width) {
-        var tile = layer.tileArray[y * layer.height + x];
-        createObject(tile, x, y);
+  private function createObjects(map: FlxTilemap) {
+    for (y in 0...map.heightInTiles) {
+      for (x in 0...map.widthInTiles) {
+        var tile = map.getTile(x, y);
+        if (createObject(tile, x, y)) {
+          map.setTile(x, y, 1, false);
+        }
       }
     }
+    map.setDirty(true);
   }
 
-  private function createObject(type: Int, mapX: Int, mapY: Int) {
+  private function createObject(type: Int, mapX: Int, mapY: Int): Bool {
     switch (type) {
-      case 0:
-        return;
       case 3|5:
         var door = new Door(mapX, mapY, type == 5);
         doors.add(door);
@@ -119,8 +120,9 @@ class Level extends FlxGroup {
         var shifter = new Shifter(mapX, mapY, type - 14);
         shifters.add(shifter);
       default:
-        trace("Don't know what to do with tile ID " + type);
+        return false;
     }
+    return true;
   }
 
   override public function update(elapsed: Float): Void {
