@@ -28,6 +28,7 @@ class Level extends FlxGroup {
   private var doors: FlxTypedGroup<Door> = new FlxTypedGroup<Door>();
   private var crates: FlxTypedGroup<Crate> = new FlxTypedGroup<Crate>();
   private var exits: FlxTypedGroup<Exit> = new FlxTypedGroup<Exit>();
+  private var shifters: FlxTypedGroup<Shifter> = new FlxTypedGroup<Shifter>();
   private var overlay: FlxSprite;
 
   public function new(number: Int) {
@@ -44,6 +45,7 @@ class Level extends FlxGroup {
     add(crates);
     createObjects(cast map.getLayer("objects"));
     add(keys);
+    add(shifters);
     addOverlay();
   }
 
@@ -101,10 +103,8 @@ class Level extends FlxGroup {
     switch (type) {
       case 0:
         return;
-      case 3:
-      case 5:
+      case 3|5:
         var door = new Door(mapX, mapY, type == 5);
-        add(door);
         doors.add(door);
       case 9:
         var crate = new Crate(mapX, mapY);
@@ -118,6 +118,9 @@ class Level extends FlxGroup {
       case 13:
         var key = new Key(mapX, mapY);
         keys.add(key);
+      case 14|15|16|17:
+        var shifter = new Shifter(mapX, mapY, type - 14);
+        shifters.add(shifter);
       default:
         trace("Don't know what to do with tile ID " + type);
     }
@@ -150,7 +153,7 @@ class Level extends FlxGroup {
   }
 
   private function move(dx: Int, dy: Int): Void {
-    if (player.tweening) {
+    if (player.walking) {
       return;
     }
     var newX = player.mapX + dx;
@@ -164,15 +167,25 @@ class Level extends FlxGroup {
 
     player.moveTo(newX, newY);
 
-    for (key in keys) {
-      if (key.mapX == newX && key.mapY == newY) {
-        player.pickUp(key);
+    if (player.shape == Shape.HUMAN) {
+      for (key in keys) {
+        if (key.mapX == newX && key.mapY == newY) {
+          player.pickUp(key);
+        }
       }
     }
 
-    for (crate in crates) {
-      if (crate.mapX == newX && crate.mapY == newY) {
-        crate.moveTo(newX + dx, newY + dy);
+    if (player.shape == Shape.BEAR) {
+      for (crate in crates) {
+        if (crate.mapX == newX && crate.mapY == newY) {
+          crate.moveTo(newX + dx, newY + dy);
+        }
+      }
+    }
+
+    for (shifter in shifters) {
+      if (shifter.isAt(newX, newY)) {
+        player.shiftShape(shifter.shape);
       }
     }
 
@@ -185,8 +198,10 @@ class Level extends FlxGroup {
 
   private function tryMove(mapX: Int, mapY: Int, dx: Int, dy: Int) {
     openAnyDoors(mapX, mapY);
-    pushAnyCrates(mapX, mapY, dx, dy);
-    return isFree(mapX, mapY);
+    if (player.shape == Shape.BEAR) {
+      pushAnyCrates(mapX, mapY, dx, dy);
+    }
+    return isFree(mapX, mapY, player.shape == Shape.SNAKE);
   }
 
   private function openAnyDoors(mapX: Int, mapY: Int) {
@@ -205,7 +220,7 @@ class Level extends FlxGroup {
 
   private function pushAnyCrates(mapX: Int, mapY: Int, dx: Int, dy: Int) {
     for (crate in crates) {
-      if (crate.mapX == mapX && crate.mapY == mapY) {
+      if (crate.isAt(mapX, mapY)) {
         var newX = mapX + dx;
         var newY = mapY + dy;
         if (isFree(newX, newY)) {
@@ -279,18 +294,20 @@ class Level extends FlxGroup {
     }
   }
 
-  private function isFree(mapX: Int, mapY: Int) {
+  private function isFree(mapX: Int, mapY: Int, ignoreDoors: Bool = false) {
     var tile = map.getTile(mapX, mapY);
     if (tile != 1) {
       return false;
     }
-    for (door in doors) {
-      if (door.mapX == mapX && door.mapY == mapY && !door.open) {
-        return false;
+    if (!ignoreDoors) {
+      for (door in doors) {
+        if (door.isAt(mapX, mapY) && !door.open) {
+          return false;
+        }
       }
     }
     for (crate in crates) {
-      if (crate.mapX == mapX && crate.mapY == mapY) {
+      if (crate.isAt(mapX, mapY)) {
         return false;
       }
     }

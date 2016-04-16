@@ -6,11 +6,12 @@ import flixel.FlxObject;
 
 class Player extends MapObject {
 
-  public var tweening: Bool;
+  public var walking: Bool;
   public var carried: Array<MapObject> = [];
+  public var shape: Shape = Shape.HUMAN;
 
   public function new(mapX: Int, mapY: Int) {
-    super(mapX, mapY, 60, 9);
+    super(mapX, mapY, 60, 40);
     addAnimation("stand_left", [0], true);
     addAnimation("walk_left", [1, 2], true);
     addAnimation("stand_right", [0]);
@@ -20,7 +21,21 @@ class Player extends MapObject {
     addAnimation("stand_down", [6]);
     addAnimation("walk_down", [7, 8]);
     facing = FlxObject.DOWN;
-    setStillFrame();
+    refresh();
+  }
+
+  private override function addAnimation(name: String, frames: Array<Int>, ?flipX: Bool) {
+    var f = function(offset: Int) {
+      var ret = [];
+      for (frame in frames) {
+        ret.push(offset + frame);
+      }
+      return ret;
+    }
+    super.addAnimation("human_" + name, f(0), flipX);
+    super.addAnimation("bear_" + name, f(10), flipX);
+    super.addAnimation("snake_" + name, f(20), flipX);
+    super.addAnimation("unknown_" + name, f(30), flipX);
   }
 
   public function moveTo(mapX: Int, mapY: Int) {
@@ -28,11 +43,11 @@ class Player extends MapObject {
     var dy = mapY - this.mapY;
     this.mapX = mapX;
     this.mapY = mapY;
-    this.tweening = true;
+    this.walking = true;
     FlxTween.tween(this, {x: Level.TILE_SIZE * mapX, y: Level.TILE_SIZE * mapY}, 0.2, {
       onComplete: function(tween: FlxTween) {
-        setStillFrame();
-        this.tweening = false;
+        this.walking = false;
+        refresh();
       }
     });
 
@@ -46,11 +61,30 @@ class Player extends MapObject {
       facing = FlxObject.DOWN;
     }
 
-    animation.play("walk_" + facingSuffix());
+    refresh();
   }
 
-  private function setStillFrame() {
-    animation.play("stand_" + facingSuffix());
+  public function shiftShape(shape: Shape) {
+    this.shape = shape;
+    refresh();
+  }
+
+  private function refresh() {
+    if (walking) {
+      animation.play(shapePrefix() + "_walk_" + facingSuffix());
+    } else {
+      animation.play(shapePrefix() + "_stand_" + facingSuffix());
+    }
+  }
+
+  private function shapePrefix(): String {
+    switch (shape) {
+      case Shape.HUMAN: return "human";
+      case Shape.BEAR: return "bear";
+      case Shape.SNAKE: return "snake";
+      case Shape.UNKNOWN: return "unknown";
+      default: return "";
+    }
   }
 
   private function facingSuffix(): String {
