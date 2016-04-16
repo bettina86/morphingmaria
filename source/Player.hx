@@ -45,28 +45,23 @@ class Player extends MapObject {
       facing = FlxObject.DOWN;
     }
 
-    switch (facing) {
-      case FlxObject.LEFT:
-        animation.play("walk_left");
-      case FlxObject.RIGHT:
-        animation.play("walk_right");
-      case FlxObject.UP:
-        animation.play("walk_up");
-      case FlxObject.DOWN:
-        animation.play("walk_down");
-    }
+    animation.play("walk_" + facingSuffix());
   }
 
   private function setStillFrame() {
+    animation.play("stand_" + facingSuffix());
+  }
+
+  private function facingSuffix(): String {
     switch (facing) {
       case FlxObject.LEFT:
-        animation.play("stand_left");
+        return "left";
       case FlxObject.RIGHT:
-        animation.play("stand_right");
+        return "right";
       case FlxObject.UP:
-        animation.play("stand_up");
+        return "up";
       case FlxObject.DOWN:
-        animation.play("stand_down");
+        return "down";
     }
   }
 }
