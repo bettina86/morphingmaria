@@ -22,6 +22,7 @@ class GameState extends FlxState {
   private var hud: FlxGroup;
   private var levelButtons: Array<FlxButton> = [];
 
+  private var currentLevel: Int = 1;
   private var levelReached: Int = 1;
   private var level: Level;
   private var endingLevel: Bool;
@@ -32,7 +33,9 @@ class GameState extends FlxState {
     hud = new FlxGroup();
     add(hud);
 
-    switchLevel(levelReached);
+    load();
+
+    switchLevel(currentLevel);
     level.fadeIn();
   }
 
@@ -56,7 +59,7 @@ class GameState extends FlxState {
         levelButtons[number] = button;
         hud.add(button);
       }
-      button.label.borderStyle = level != null && level.number == number ? SHADOW : NONE;
+      button.label.borderStyle = number == currentLevel ? SHADOW : NONE;
     }
   }
 
@@ -65,18 +68,18 @@ class GameState extends FlxState {
       world.remove(level);
       level = null;
     }
-    if (number > 0) {
-      if (number > levelReached) {
-        levelReached = number;
-      }
-      if (number <= NUM_LEVELS) {
-        level = new Level(number);
-        world.add(level);
-      } else {
-        addEndScreen();
-      }
+    currentLevel = number;
+    if (number > levelReached) {
+      levelReached = number;
+    }
+    if (number <= NUM_LEVELS) {
+      level = new Level(number);
+      world.add(level);
+    } else {
+      addEndScreen();
     }
     updateLevelButtons();
+    save();
   }
 
   private function switchLevelWithFade(number: Int, ?delay: Int = 0) {
@@ -97,10 +100,27 @@ class GameState extends FlxState {
     super.update(elapsed);
 
     if (level.finished) {
-      switchLevelWithFade(level.number + 1, 500);
+      switchLevelWithFade(currentLevel + 1, 500);
     }
   }
 
   private function addEndScreen() {
+  }
+
+  private function load() {
+    var currentLevel: Null<Int> = FlxG.save.data.currentLevel;
+    if (currentLevel != null) {
+      this.currentLevel = currentLevel;
+    }
+    var levelReached: Null<Int> = FlxG.save.data.levelReached;
+    if (levelReached != null) {
+      this.levelReached = levelReached;
+    }
+  }
+
+  private function save() {
+    FlxG.save.data.currentLevel = currentLevel;
+    FlxG.save.data.levelReached = levelReached;
+    FlxG.save.flush();
   }
 }

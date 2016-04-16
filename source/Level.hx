@@ -18,7 +18,6 @@ class Level extends FlxGroup {
   public inline static var TILE_SIZE = 16;
   public static var TILE_SIZE_POINT = new FlxPoint(TILE_SIZE, TILE_SIZE);
 
-  public var number: Int;
   public var finished: Bool;
 
   private var map: FlxTilemap;
@@ -33,8 +32,6 @@ class Level extends FlxGroup {
 
   public function new(number: Int) {
     super();
-
-    this.number = number;
 
     var filename = "assets/levels/level" + number + ".tmx";
     var map = new TiledMap(filename);
@@ -189,6 +186,8 @@ class Level extends FlxGroup {
       }
     }
 
+    updateWires();
+
     for (exit in exits) {
       if (newX == exit.mapX && newY == exit.mapY) {
         finished = true;
@@ -240,7 +239,12 @@ class Level extends FlxGroup {
 
     var queue: Array<Coords> = [];
     for (crate in crates) {
-      queue.push(new Coords(crate.mapX, crate.mapY));
+      if (isPlate(crate.mapX, crate.mapY)) {
+        queue.push(new Coords(crate.mapX, crate.mapY));
+      }
+    }
+    if ((player.shape == Shape.HUMAN || player.shape == Shape.BEAR) && isPlate(player.mapX, player.mapY)) {
+      queue.push(new Coords(player.mapX, player.mapY));
     }
 
     while (queue.length > 0) {
@@ -275,21 +279,26 @@ class Level extends FlxGroup {
     }
   }
 
+  private function isPlate(mapX: Int, mapY: Int) {
+    var tile = wires.getTile(mapX, mapY);
+    return tile == 21 || tile == 31;
+  }
+
   private function isWire(mapX: Int, mapY: Int) {
     var tile = wires.getTile(mapX, mapY);
-    return tile >= 20 && tile < 40;
+    return tile >= 21 && tile < 41;
   }
 
   private function isWireActive(mapX: Int, mapY: Int) {
     var tile = wires.getTile(mapX, mapY);
-    return tile >= 30 && tile < 40;
+    return tile >= 31 && tile < 41;
   }
   
   private function setWireActive(mapX: Int, mapY: Int, active: Bool) {
     var tile = wires.getTile(mapX, mapY);
-    if (tile >= 20 && tile < 30 && active) {
+    if (tile >= 21 && tile < 31 && active) {
       wires.setTile(mapX, mapY, tile + 10, false);
-    } else if (tile >= 30 && tile < 40 && !active) {
+    } else if (tile >= 31 && tile < 41 && !active) {
       wires.setTile(mapX, mapY, tile - 10, false);
     }
   }
