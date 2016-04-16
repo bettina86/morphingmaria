@@ -22,9 +22,11 @@ class Level extends FlxGroup {
   public var finished: Bool;
 
   private var map: FlxTilemap;
+  private var wires: FlxTilemap;
   private var player: Player;
   private var keys: Array<Key> = [];
   private var doors: Array<Door> = [];
+  private var crates: Array<Crate> = [];
   private var exit: MapObject;
 
   public function new(number: Int) {
@@ -36,6 +38,7 @@ class Level extends FlxGroup {
     var map = new TiledMap(filename);
 
     createTiles(cast map.getLayer("base"));
+    createWires(cast map.getLayer("wires"));
     createObjects(cast map.getLayer("objects"));
 
     // FlxG.camera.focusOn(new FlxPoint(map.fullWidth / 2, map.fullHeight / 2));
@@ -79,6 +82,16 @@ class Level extends FlxGroup {
     add(tilemap);
   }
 
+  private function createWires(layer: TiledTileLayer) {
+    var tilemap: FlxTilemap = new FlxTilemap();
+    if (layer != null) {
+      tilemap.loadMapFromArray(layer.tileArray, layer.width, layer.height,
+          "assets/images/tileset.png", TILE_SIZE, TILE_SIZE, OFF, 1);
+    }
+    wires = tilemap;
+    add(tilemap);
+  }
+
   private function createObjects(layer: TiledTileLayer) {
     for (y in 0...layer.height) {
       for (x in 0...layer.width) {
@@ -97,6 +110,10 @@ class Level extends FlxGroup {
         var door = new Door(mapX, mapY, type == 5);
         add(door);
         doors.push(door);
+      case 9:
+        var crate = new Crate(mapX, mapY);
+        add(crate);
+        crates.push(crate);
       case 11:
         player = new Player(mapX, mapY);
         add(player);
@@ -147,9 +164,10 @@ class Level extends FlxGroup {
     if (newX < 0 || newX >= map.width || newY < 0 || newY >= map.height) {
       return;
     }
-    if (!isPassable(newX, newY)) {
+    if (!tryMove(newX, newY, dx, dy)) {
       return;
     }
+
     player.moveTo(newX, newY);
 
     for (key in keys) {
@@ -159,27 +177,134 @@ class Level extends FlxGroup {
       }
     }
 
+    for (crate in crates) {
+      if (crate.mapX == newX && crate.mapY == newY) {
+        crate.moveTo(newX + dx, newY + dy);
+      }
+    }
+
     if (newX == exit.mapX && newY == exit.mapY) {
       finished = true;
     }
   }
 
-  private function isPassable(mapX: Int, mapY: Int) {
+  private function tryMove(mapX: Int, mapY: Int, dx: Int, dy: Int) {
+    openAnyDoors(mapX, mapY);
+    pushAnyCrates(mapX, mapY, dx, dy);
+    return isFree(mapX, mapY);
+  }
+
+  private function openAnyDoors(mapX: Int, mapY: Int) {
+    var key = player.getCarriedKey();
+    if (key == null) {
+      return;
+    }
+    for (door in doors) {
+      if (door.mapX == mapX && door.mapY == mapY && !door.open) {
+        player.carried.remove(key);
+        remove(key);
+        door.setOpen(true);
+      }
+    }
+  }
+
+  private function pushAnyCrates(mapX: Int, mapY: Int, dx: Int, dy: Int) {
+    for (crate in crates) {
+      if (crate.mapX == mapX && crate.mapY == mapY) {
+        var newX = mapX + dx;
+        var newY = mapY + dy;
+        if (isFree(newX, newY)) {
+          crate.moveTo(newX, newY);
+          updateWires();
+        }
+      }
+    }
+  }
+
+  private function updateWires() {
+    for (y in 0...wires.heightInTiles) {
+      for (x in 0...wires.widthInTiles) {
+        setWireActive(x, y, false);
+      }
+    }
+
+    var queue: Array<Coords> = [];
+    for (crate in crates) {
+      queue.push(new Coords(crate.mapX, crate.mapY));
+    }
+
+    while (queue.length > 0) {
+      var coords = queue.pop();
+      if (!isWire(coords.x, coords.y)) {
+        continue;
+      }
+      if (isWireActive(coords.x, coords.y)) {
+        continue;
+      }
+      setWireActive(coords.x, coords.y, true);
+      if (coords.x > 0) {
+        queue.push(new Coords(coords.x - 1, coords.y));
+      }
+      if (coords.x < wires.widthInTiles - 1) {
+        queue.push(new Coords(coords.x + 1, coords.y));
+      }
+      if (coords.y > 0) {
+        queue.push(new Coords(coords.x, coords.y - 1));
+      }
+      if (coords.y < wires.heightInTiles - 1) {
+        queue.push(new Coords(coords.x, coords.y + 1));
+      }
+    }
+
+    wires.setDirty(true);
+
+    for (door in doors) {
+      if (isWire(door.mapX, door.mapY)) {
+        door.setOpen(isWireActive(door.mapX, door.mapY));
+      } 
+    }
+  }
+
+  private function isWire(mapX: Int, mapY: Int) {
+    var tile = wires.getTile(mapX, mapY);
+    return tile >= 20 && tile < 40;
+  }
+
+  private function isWireActive(mapX: Int, mapY: Int) {
+    var tile = wires.getTile(mapX, mapY);
+    return tile >= 30 && tile < 40;
+  }
+  
+  private function setWireActive(mapX: Int, mapY: Int, active: Bool) {
+    var tile = wires.getTile(mapX, mapY);
+    if (tile >= 20 && tile < 30 && active) {
+      wires.setTile(mapX, mapY, tile + 10, false);
+    } else if (tile >= 30 && tile < 40 && !active) {
+      wires.setTile(mapX, mapY, tile - 10, false);
+    }
+  }
+
+  private function isFree(mapX: Int, mapY: Int) {
     var tile = map.getTile(mapX, mapY);
     if (tile != 1) {
       return false;
     }
     for (door in doors) {
       if (door.mapX == mapX && door.mapY == mapY && !door.open) {
-        var key = player.getCarriedKey();
-        if (key == null) {
-          return false;
-        }
-        player.carried.remove(key);
-        remove(key);
-        door.setOpen(true);
+        return false;
+      }
+    }
+    for (crate in crates) {
+      if (crate.mapX == mapX && crate.mapY == mapY) {
+        return false;
       }
     }
     return true;
   }
+}
+
+class Coords {
+  public var x: Int;
+  public var y: Int;
+  public function new(x: Int, y: Int) { this.x = x; this.y = y; }
 }

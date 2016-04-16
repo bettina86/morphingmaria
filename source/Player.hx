@@ -10,7 +10,7 @@ class Player extends MapObject {
   public var carried: Array<MapObject> = [];
 
   public function new(mapX: Int, mapY: Int) {
-    super(mapX, mapY, 20, 9);
+    super(mapX, mapY, 60, 9);
     addAnimation("stand_left", [0], true);
     addAnimation("walk_left", [1, 2], true);
     addAnimation("stand_right", [0]);
