@@ -72,7 +72,11 @@ class GameState extends FlxState {
     if (number > levelReached) {
       levelReached = number;
     }
-    level = new Level(number);
+    if (number <= NUM_LEVELS) {
+      level = new Puzzle(number);
+    } else {
+      level = new Ending();
+    }
     world.add(level);
     updateLevelButtons();
     save();

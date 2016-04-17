@@ -11,17 +11,22 @@ class Player extends MapObject {
   public var canStop: Bool = true;
   public var carried: Array<MapObject> = [];
   public var shape: Shape = Shape.HUMAN;
+  public var slow: Bool;
 
   public function new(mapX: Int, mapY: Int) {
     super(mapX, mapY, makeFrames());
-    addAnimation("stand_left", [10], true);
-    addAnimation("walk_left", [11, 12, 13, 14], true);
-    addAnimation("stand_right", [10]);
-    addAnimation("walk_right", [11, 12, 13, 14]);
-    addAnimation("stand_up", [5]);
-    addAnimation("walk_up", [6, 7, 8, 9]);
-    addAnimation("stand_down", [0]);
-    addAnimation("walk_down", [1, 2, 3, 4]);
+    for (i in 0...2) {
+      var suffix = i == 0 ? "" : "_slow";
+      var frameRate = i == 0 ? 10 : 4;
+      addAnimation("stand_left" + suffix, [10], true, frameRate);
+      addAnimation("walk_left" + suffix, [11, 12, 13, 14], true, frameRate);
+      addAnimation("stand_right" + suffix, [10], false, frameRate);
+      addAnimation("walk_right" + suffix, [11, 12, 13, 14], false, frameRate);
+      addAnimation("stand_up" + suffix, [5], false, frameRate);
+      addAnimation("walk_up" + suffix, [6, 7, 8, 9], false, frameRate);
+      addAnimation("stand_down" + suffix, [0], false, frameRate);
+      addAnimation("walk_down" + suffix, [1, 2, 3, 4], false, frameRate);
+    }
     facing = FlxObject.DOWN;
     refresh();
   }
@@ -35,7 +40,7 @@ class Player extends MapObject {
     ]);
   }
 
-  private override function addAnimation(name: String, frames: Array<Int>, ?flipX: Bool) {
+  private override function addAnimation(name: String, frames: Array<Int>, flipX: Bool = false, frameRate: Int = 10) {
     var f = function(offset: Int) {
       var ret = [];
       for (frame in frames) {
@@ -43,20 +48,22 @@ class Player extends MapObject {
       }
       return ret;
     }
-    super.addAnimation("human_" + name, f(0), flipX);
-    super.addAnimation("bear_" + name, f(15), flipX);
-    super.addAnimation("snake_" + name, f(30), flipX);
-    super.addAnimation("unknown_" + name, f(45), flipX);
+    super.addAnimation("human_" + name, f(0), flipX, frameRate);
+    super.addAnimation("bear_" + name, f(15), flipX, frameRate);
+    super.addAnimation("snake_" + name, f(30), flipX, frameRate);
+    super.addAnimation("unknown_" + name, f(45), flipX, frameRate);
   }
 
   public function moveTo(mapX: Int, mapY: Int) {
     var dx = mapX - this.mapX;
     var dy = mapY - this.mapY;
+    var d = Math.abs(dx) + Math.abs(dy);
     this.mapX = mapX;
     this.mapY = mapY;
     this.walking = true;
     this.canStop = false;
-    FlxTween.tween(this, {x: Level.TILE_SIZE * mapX, y: Level.TILE_SIZE * mapY}, 0.2, {
+    var duration = slow ? 1.0 * d : 0.2 * d;
+    FlxTween.tween(this, {x: Level.TILE_SIZE * mapX, y: Level.TILE_SIZE * mapY}, duration, {
       onComplete: function(tween: FlxTween) {
         this.canStop = true;
       }
@@ -81,11 +88,14 @@ class Player extends MapObject {
   }
 
   public function refresh() {
+    var slowSuffix = slow ? "_slow" : "";
+    var name;
     if (walking) {
-      animation.play(shapePrefix() + "_walk_" + facingSuffix());
+      name = shapePrefix() + "_walk_" + facingSuffix() + slowSuffix;
     } else {
-      animation.play(shapePrefix() + "_stand_" + facingSuffix());
+      name = shapePrefix() + "_stand_" + facingSuffix() + slowSuffix;
     }
+    animation.play(name);
   }
 
   private function shapePrefix(): String {

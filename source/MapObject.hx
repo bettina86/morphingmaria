@@ -28,8 +28,8 @@ class MapObject extends FlxSprite {
     return FlxTileFrames.fromRectangle("assets/images/tileset.png", Level.TILE_SIZE_POINT, region);
   }
 
-  private function addAnimation(name: String, frames: Array<Int>, ?flipX: Bool) {
-    animation.add(name, frames, 10, true, flipX != null && flipX);
+  private function addAnimation(name: String, frames: Array<Int>, flipX: Bool = false, frameRate: Int = 10) {
+    animation.add(name, frames, frameRate, true, flipX);
   }
 
   public function setMapPosition(mapX: Int, mapY: Int) {

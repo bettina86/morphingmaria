@@ -34,15 +34,9 @@ class Level extends FlxGroup {
   private var hints: FlxGroup = new FlxGroup();
   private var overlay: FlxSprite;
 
-  public function new(number: Int) {
+  public function new(basename: String) {
     super();
 
-    var basename;
-    if (number > GameState.NUM_LEVELS) {
-      basename = "ending";
-    } else {
-      basename = "level" + number;
-    }
     var filename = "assets/levels/" + basename + ".tmx";
     var map = new TiledMap(filename);
     createTiles(cast map.getLayer("base"));
@@ -58,10 +52,6 @@ class Level extends FlxGroup {
     addOverlay();
 
     updateWires();
-
-    if (number == 1) {
-      showHint("Use the arrow keys to move");
-    }
   }
 
   public function fadeIn(onComplete: Void -> Void = null) {
@@ -146,38 +136,6 @@ class Level extends FlxGroup {
     return true;
   }
 
-  override public function update(elapsed: Float): Void {
-    super.update(elapsed);
-
-    if (finished) {
-      return;
-    }
-
-    var dx = 0;
-    var dy = 0;
-    if (FlxG.keys.anyPressed([LEFT, A, O])) {
-      dx--;
-    }
-    if (FlxG.keys.anyPressed([RIGHT, D, U])) {
-      dx++;
-    }
-    if (FlxG.keys.anyPressed([UP, W, PERIOD])) {
-      dy--;
-    }
-    if (FlxG.keys.anyPressed([DOWN, S, E])) {
-      dy++;
-    }
-    if (dx != 0 && dy == 0 || dx == 0 && dy != 0) {
-      if (player.canStop) {
-        move(dx, dy);
-      }
-    }
-    if (player.walking && player.canStop) {
-      player.walking = false;
-      player.refresh();
-    }
-  }
-
   private function move(dx: Int, dy: Int): Void {
     var oldX = player.mapX;
     var oldY = player.mapY;
@@ -188,6 +146,13 @@ class Level extends FlxGroup {
     }
     if (!tryMove(newX, newY, dx, dy)) {
       return;
+    }
+
+    for (exit in exits) {
+      if (newX == exit.mapX && newY == exit.mapY) {
+        finished = true;
+        player.slow = true;
+      }
     }
 
     player.moveTo(newX, newY);
@@ -229,12 +194,6 @@ class Level extends FlxGroup {
     }
 
     updateWires();
-
-    for (exit in exits) {
-      if (newX == exit.mapX && newY == exit.mapY) {
-        finished = true;
-      }
-    }
   }
 
   private function tryMove(mapX: Int, mapY: Int, dx: Int, dy: Int) {
