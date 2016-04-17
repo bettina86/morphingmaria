@@ -211,8 +211,8 @@ class Level extends FlxGroup {
         if (player.shape != Shape.HUMAN) {
           for (obj in player.carried) {
             obj.setMapPosition(oldX, oldY);
-            player.carried.remove(obj);
           }
+          player.carried = [];
         }
       }
     }
