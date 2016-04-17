@@ -63,7 +63,7 @@ class GameState extends FlxState {
   }
 
   private function addRestartButton() {
-    var button = new FlxButton(256, 256 - 32, function() {
+    var button = new FlxButton(256, 256 - 16, function() {
       switchLevelWithFade(currentLevel);
     });
     button.loadGraphic("assets/images/level_button.png");
