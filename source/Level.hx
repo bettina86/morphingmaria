@@ -246,9 +246,11 @@ class Level extends FlxGroup {
     }
     for (door in doors) {
       if (door.mapX == mapX && door.mapY == mapY && !door.open) {
-        player.carried.remove(key);
-        keys.remove(key);
-        door.setOpen(true);
+        if (!isWire(mapX, mapY)) {
+          player.carried.remove(key);
+          keys.remove(key);
+          door.setOpen(true);
+        }
       }
     }
   }
@@ -366,7 +368,11 @@ class Level extends FlxGroup {
       if (door.isAt(mapX, mapY) && !door.open) {
         if (forPlayer) {
           if (player.shape != Shape.SNAKE) {
-            showHint("You are too big to fit under the door");
+            if (player.getCarriedKey() != null && isWire(mapX, mapY)) {
+              showHint("This door is controlled by a pressure plate");
+            } else {
+              showHint("You are too big to fit under the door");
+            }
             return false;
           }
         } else {
