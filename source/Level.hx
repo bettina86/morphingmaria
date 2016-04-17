@@ -1,6 +1,7 @@
 package;
 
 import flixel.FlxG;
+import flixel.system.FlxSound;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxEase;
@@ -34,8 +35,13 @@ class Level extends FlxGroup {
   private var hints: FlxGroup = new FlxGroup();
   private var overlay: FlxSprite;
 
+  private var takeKeySound: FlxSound;
+  private var dropKeySound: FlxSound;
+
   public function new(basename: String) {
     super();
+
+    loadSounds();
 
     var filename = "assets/levels/" + basename + ".tmx";
     var map = new TiledMap(filename);
@@ -52,6 +58,11 @@ class Level extends FlxGroup {
     addOverlay();
 
     updateWires();
+  }
+
+  private function loadSounds() {
+    takeKeySound = FlxG.sound.load("assets/sounds/take_key.wav");
+    dropKeySound = FlxG.sound.load("assets/sounds/drop_key.wav");
   }
 
   public function fadeIn(onComplete: Void -> Void = null) {
@@ -161,6 +172,7 @@ class Level extends FlxGroup {
       if (key.mapX == newX && key.mapY == newY) {
         if (player.shape == Shape.HUMAN) {
           player.pickUp(key);
+          takeKeySound.play();
         } else if (player.shape == Shape.BEAR) {
           showHint("Your paws are too big to hold this key");
         } else if (player.shape == Shape.SNAKE) {
@@ -183,10 +195,15 @@ class Level extends FlxGroup {
         shifter.hide();
         addSmoke(newX, newY);
         if (player.shape != Shape.HUMAN) {
+          var droppedAnything = false;
           for (obj in player.carried) {
             obj.setMapPosition(oldX, oldY);
+            droppedAnything = true;
           }
           player.carried = [];
+          if (droppedAnything) {
+            dropKeySound.play();
+          }
         }
       } else {
         shifter.show();

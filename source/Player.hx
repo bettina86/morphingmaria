@@ -1,5 +1,7 @@
 package;
 
+import flixel.FlxG;
+import flixel.system.FlxSound;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.graphics.frames.FlxTileFrames;
@@ -12,6 +14,8 @@ class Player extends MapObject {
   public var carried: Array<MapObject> = [];
   public var shape: Shape = Shape.HUMAN;
   public var slow: Bool;
+
+  private var walkSound: FlxSound;
 
   public function new(mapX: Int, mapY: Int) {
     super(mapX, mapY, makeFrames());
@@ -29,6 +33,24 @@ class Player extends MapObject {
     }
     facing = FlxObject.DOWN;
     refresh();
+    loadSound();
+  }
+
+  private function loadSound() {
+    var prefix = "";
+    var volume = 1.0;
+    switch (shape) {
+      case Shape.HUMAN:
+        prefix = "human";
+        volume = 0.2;
+      case Shape.BEAR:
+        prefix = "bear";
+        volume = 1.0;
+      case Shape.SNAKE:
+        prefix = "snake";
+        volume = 0.1;
+    }
+    walkSound = FlxG.sound.load("assets/sounds/" + prefix + "_walk.wav", volume);
   }
 
   private static function makeFrames(): FlxTileFrames {
@@ -36,7 +58,6 @@ class Player extends MapObject {
       FlxTileFrames.fromRectangle("assets/images/human.png", Level.TILE_SIZE_POINT),
       FlxTileFrames.fromRectangle("assets/images/bear.png", Level.TILE_SIZE_POINT),
       FlxTileFrames.fromRectangle("assets/images/snake.png", Level.TILE_SIZE_POINT),
-      FlxTileFrames.fromRectangle("assets/images/human.png", Level.TILE_SIZE_POINT),
     ]);
   }
 
@@ -51,7 +72,6 @@ class Player extends MapObject {
     super.addAnimation("human_" + name, f(0), flipX, frameRate);
     super.addAnimation("bear_" + name, f(15), flipX, frameRate);
     super.addAnimation("snake_" + name, f(30), flipX, frameRate);
-    super.addAnimation("unknown_" + name, f(45), flipX, frameRate);
   }
 
   public function moveTo(mapX: Int, mapY: Int) {
@@ -80,10 +100,15 @@ class Player extends MapObject {
     }
 
     refresh();
+
+    if (!slow) {
+      walkSound.play(true);
+    }
   }
 
   public function shiftShape(shape: Shape) {
     this.shape = shape;
+    loadSound();
     haxe.Timer.delay(this.refresh, 100);
   }
 
@@ -103,7 +128,6 @@ class Player extends MapObject {
       case Shape.HUMAN: return "human";
       case Shape.BEAR: return "bear";
       case Shape.SNAKE: return "snake";
-      case Shape.UNKNOWN: return "unknown";
       default: return "";
     }
   }

@@ -17,8 +17,6 @@ class Shifter extends MapObject {
         shape = Shape.BEAR;
       case 2:
         shape = Shape.SNAKE;
-      case 3:
-        shape = Shape.UNKNOWN;
     }
 
     addAnimation("default", [shapeIndex]);

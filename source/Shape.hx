@@ -4,5 +4,4 @@ enum Shape {
   HUMAN;
   BEAR;
   SNAKE;
-  UNKNOWN;
 }
