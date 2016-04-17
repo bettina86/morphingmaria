@@ -27,4 +27,15 @@ class Shifter extends MapObject {
     this.y -= 0.5;
     FlxTween.tween(this, {y: this.y - 2}, 1.5, {type: FlxTween.PINGPONG});
   }
+
+  public function hide() {
+    alpha = 0;
+  }
+
+  public function show() {
+    if (alpha >= 0.999) {
+      return;
+    }
+    FlxTween.tween(this, {alpha: 1.0}, 0.2);
+  }
 }

@@ -77,7 +77,7 @@ class Player extends MapObject {
 
   public function shiftShape(shape: Shape) {
     this.shape = shape;
-    refresh();
+    haxe.Timer.delay(this.refresh, 100);
   }
 
   public function refresh() {

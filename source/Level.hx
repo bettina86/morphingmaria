@@ -3,6 +3,7 @@ package;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
+import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.addons.editors.tiled.TiledMap;
 import flixel.addons.editors.tiled.TiledLayer.TiledLayerType;
@@ -206,14 +207,18 @@ class Level extends FlxGroup {
     }
 
     for (shifter in shifters) {
-      if (shifter.isAt(newX, newY)) {
+      if (shifter.isAt(newX, newY) && player.shape != shifter.shape) {
         player.shiftShape(shifter.shape);
+        shifter.hide();
+        addSmoke(newX, newY);
         if (player.shape != Shape.HUMAN) {
           for (obj in player.carried) {
             obj.setMapPosition(oldX, oldY);
           }
           player.carried = [];
         }
+      } else {
+        shifter.show();
       }
     }
 
@@ -258,6 +263,24 @@ class Level extends FlxGroup {
           updateWires();
         }
       }
+    }
+  }
+
+  private function addSmoke(mapX: Int, mapY: Int) {
+    for (i in 0...3) {
+      var smoke = new MapObject(mapX, mapY, MapObject.tilesetFrames(7, 1));
+      smoke.flipX = Math.random() > 0.5;
+      smoke.flipY = Math.random() > 0.5;
+      smoke.alpha = 0.5;
+      var dx = 4 * (Math.random() - 0.5);
+      var dy = 2 * Math.random();
+      smoke.x += dx;
+      smoke.y += dy;
+      FlxTween.tween(smoke, {x: smoke.x + dx, y: smoke.y + dy, alpha: 0}, 2.0, {
+        onComplete: function(tween: FlxTween) { remove(smoke); },
+        ease: FlxEase.quadOut
+      });
+      add(smoke);
     }
   }
 
