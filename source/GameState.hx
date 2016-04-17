@@ -32,11 +32,23 @@ class GameState extends FlxState {
     add(world);
     hud = new FlxGroup();
     add(hud);
+    addRestartButton();
 
     load();
 
     switchLevel(currentLevel);
     level.fadeIn();
+  }
+
+  private function addRestartButton() {
+    var button = new FlxButton(256, 0, function() {
+      switchLevelWithFade(currentLevel);
+    });
+    button.loadGraphic("assets/images/level_button.png");
+    button.label = new FlxText(0, 0, 64, "Restart");
+    button.label.alignment = CENTER;
+    button.labelOffsets = [new FlxPoint(0, 1), new FlxPoint(0, 1), new FlxPoint(1, 2)];
+    hud.add(button);
   }
 
   private function updateLevelButtons() {
