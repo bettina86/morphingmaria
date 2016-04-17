@@ -116,6 +116,7 @@ class Player extends MapObject {
     this.shape = shape;
     loadSound();
     shapeShiftSound.play();
+    FlxG.camera.shake(0.003, 0.1);
     haxe.Timer.delay(this.refresh, 100);
   }
 
