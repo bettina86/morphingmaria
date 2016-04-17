@@ -34,10 +34,10 @@ class GameState extends FlxState {
   private var exitLevelSound: FlxSound;
 
   override public function create() {
-    buttonDownSound = FlxG.sound.load("assets/sounds/click.wav");
-    buttonUpSound = FlxG.sound.load("assets/sounds/click2.wav");
-    enterLevelSound = FlxG.sound.load("assets/sounds/enter.wav");
-    exitLevelSound = FlxG.sound.load("assets/sounds/exit.wav");
+    buttonDownSound = FlxG.sound.load("assets/sounds/click.ogg");
+    buttonUpSound = FlxG.sound.load("assets/sounds/click2.ogg");
+    enterLevelSound = FlxG.sound.load("assets/sounds/enter.ogg");
+    exitLevelSound = FlxG.sound.load("assets/sounds/exit.ogg");
 
     world = new FlxGroup();
     add(world);

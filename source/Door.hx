@@ -20,8 +20,8 @@ class Door extends MapObject {
     animation.add("closed_horizontal", [2]);
     animation.add("open_horizontal", [3]);
 
-    openSound = FlxG.sound.load("assets/sounds/door_open.wav", 0.2);
-    closeSound = FlxG.sound.load("assets/sounds/door_close.wav", 0.2);
+    openSound = FlxG.sound.load("assets/sounds/door_open.ogg", 0.2);
+    closeSound = FlxG.sound.load("assets/sounds/door_close.ogg", 0.2);
 
     refresh();
   }

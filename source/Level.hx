@@ -62,9 +62,9 @@ class Level extends FlxGroup {
   }
 
   private function loadSounds() {
-    takeKeySound = FlxG.sound.load("assets/sounds/take_key.wav");
-    dropKeySound = FlxG.sound.load("assets/sounds/drop_key.wav");
-    hintSound = FlxG.sound.load("assets/sounds/hint.wav");
+    takeKeySound = FlxG.sound.load("assets/sounds/take_key.ogg");
+    dropKeySound = FlxG.sound.load("assets/sounds/drop_key.ogg");
+    hintSound = FlxG.sound.load("assets/sounds/hint.ogg");
   }
 
   public function fadeIn(onComplete: Void -> Void = null) {

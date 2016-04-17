@@ -39,7 +39,7 @@ class Player extends MapObject {
   }
 
   private function loadSounds() {
-    shapeShiftSound = FlxG.sound.load("assets/sounds/shapeshift.wav");
+    shapeShiftSound = FlxG.sound.load("assets/sounds/shapeshift.ogg");
   }
 
   private function loadSound() {
@@ -56,7 +56,7 @@ class Player extends MapObject {
         prefix = "snake";
         volume = 0.1;
     }
-    walkSound = FlxG.sound.load("assets/sounds/" + prefix + "_walk.wav", volume);
+    walkSound = FlxG.sound.load("assets/sounds/" + prefix + "_walk.ogg", volume);
   }
 
   private static function makeFrames(): FlxTileFrames {
