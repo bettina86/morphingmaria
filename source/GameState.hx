@@ -43,7 +43,10 @@ class GameState extends FlxState {
     add(world);
     hud = new FlxGroup();
     add(hud);
+    var tower = new FlxSprite(256, 0, "assets/images/tower.png");
+    hud.add(tower);
     addRestartButton();
+    addIntroButton();
 
     load();
 
@@ -52,11 +55,25 @@ class GameState extends FlxState {
   }
 
   private function addRestartButton() {
-    var button = new FlxButton(256, 0, function() {
+    var button = new FlxButton(256, 256 - 16, function() {
       switchLevelWithFade(currentLevel);
     });
     button.loadGraphic("assets/images/level_button.png");
     button.label = new FlxText(0, 0, 64, "Restart");
+    button.label.alignment = CENTER;
+    button.labelOffsets = [new FlxPoint(0, 1), new FlxPoint(0, 1), new FlxPoint(1, 2)];
+    button.label.borderStyle = SHADOW;
+    button.onDown.sound = buttonDownSound;
+    button.onUp.sound = buttonUpSound;
+    hud.add(button);
+  }
+
+  private function addIntroButton() {
+    var button = new FlxButton(256, 256 - 64 + 8, function() {
+      FlxG.switchState(new Intro());
+    });
+    button.loadGraphic("assets/images/level_button.png");
+    button.label = new FlxText(0, 0, 64, "Intro");
     button.label.alignment = CENTER;
     button.labelOffsets = [new FlxPoint(0, 1), new FlxPoint(0, 1), new FlxPoint(1, 2)];
     button.onDown.sound = buttonDownSound;
@@ -71,7 +88,7 @@ class GameState extends FlxState {
       }
       var button = levelButtons[number];
       if (button == null) {
-        button = new FlxButton(256, 256 - 16 * number, function(n: Int) {
+        button = new FlxButton(256, 256 - 4*16 - 16 * number, function(n: Int) {
           return function() {
             switchLevelWithFade(n);
           }
