@@ -42,6 +42,17 @@ class Intro extends FlxState {
 
     addText("Fearlessly, Princess Maria chases after them...", 9, 11000);
 
+    var title = new FlxText(0, 64, 320, "MORPHING\nMARIA", 32);
+    title.alignment = CENTER;
+    title.borderStyle = SHADOW;
+    title.alpha = 0;
+    texts.add(title);
+    var author = new FlxText(0, title.y + title.height, 320, "by @frozenfractal\nfor the Ludum Dare 35 Compo");
+    author.alignment = CENTER;
+    author.borderStyle = SHADOW;
+    author.alpha = 0;
+    texts.add(author);
+
     haxe.Timer.delay(function() {
       for (obj in texts) {
         FlxTween.tween(obj, {alpha: 0.0}, 1.0);
@@ -55,17 +66,20 @@ class Intro extends FlxState {
     }, 18000);
     haxe.Timer.delay(function() {
       princess.animation.play("stand");
+      FlxTween.tween(title, {alpha: 1.0}, 1.0);
+      FlxTween.tween(author, {alpha: 1.0}, 1.0);
     }, 21000);
     haxe.Timer.delay(function() {
       princess.animation.play("walk");
       FlxTween.tween(princess, {y: 200}, 4.0);
     }, 24000);
     haxe.Timer.delay(function() {
-      princess.animation.play("walk");
       FlxTween.tween(princess, {alpha: 0}, 1.0);
     }, 27000);
     haxe.Timer.delay(function() {
       FlxTween.tween(background, {alpha: 0}, 1.0);
+      FlxTween.tween(title, {alpha: 0.0}, 1.0);
+      FlxTween.tween(author, {alpha: 0.0}, 1.0);
     }, 29000);
     haxe.Timer.delay(function() {
       FlxG.switchState(new GameState());
