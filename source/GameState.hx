@@ -16,7 +16,7 @@ import flixel.math.FlxPoint;
 
 class GameState extends FlxState {
 
-  private inline static var NUM_LEVELS = 10;
+  public inline static var NUM_LEVELS = 10;
 
   private var world: FlxGroup;
   private var hud: FlxGroup;
@@ -72,12 +72,8 @@ class GameState extends FlxState {
     if (number > levelReached) {
       levelReached = number;
     }
-    if (number <= NUM_LEVELS) {
-      level = new Level(number);
-      world.add(level);
-    } else {
-      addEndScreen();
-    }
+    level = new Level(number);
+    world.add(level);
     updateLevelButtons();
     save();
   }
@@ -102,9 +98,6 @@ class GameState extends FlxState {
     if (level.finished) {
       switchLevelWithFade(currentLevel + 1, 500);
     }
-  }
-
-  private function addEndScreen() {
   }
 
   private function load() {

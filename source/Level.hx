@@ -37,7 +37,13 @@ class Level extends FlxGroup {
   public function new(number: Int) {
     super();
 
-    var filename = "assets/levels/level" + number + ".tmx";
+    var basename;
+    if (number > GameState.NUM_LEVELS) {
+      basename = "ending";
+    } else {
+      basename = "level" + number;
+    }
+    var filename = "assets/levels/" + basename + ".tmx";
     var map = new TiledMap(filename);
     createTiles(cast map.getLayer("base"));
     createWires(cast map.getLayer("wires"));
