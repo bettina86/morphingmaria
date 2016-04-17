@@ -7,7 +7,7 @@ class Door extends MapObject {
   public var open: Bool;
 
   public function new(mapX: Int, mapY: Int, horizontal: Bool) {
-    super(mapX, mapY, 2, 4);
+    super(mapX, mapY, MapObject.tilesetFrames(2, 4));
     this.facing = horizontal ? FlxObject.DOWN : FlxObject.RIGHT;
 
     animation.add("closed_vertical", [0]);

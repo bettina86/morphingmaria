@@ -156,14 +156,17 @@ class Level extends FlxGroup {
       dy++;
     }
     if (dx != 0 && dy == 0 || dx == 0 && dy != 0) {
-      move(dx, dy);
+      if (player.canStop) {
+        move(dx, dy);
+      }
+    }
+    if (player.walking && player.canStop) {
+      player.walking = false;
+      player.refresh();
     }
   }
 
   private function move(dx: Int, dy: Int): Void {
-    if (player.walking) {
-      return;
-    }
     var oldX = player.mapX;
     var oldY = player.mapY;
     var newX = player.mapX + dx;
@@ -333,8 +336,12 @@ class Level extends FlxGroup {
     }
     for (door in doors) {
       if (door.isAt(mapX, mapY) && !door.open) {
-        if (forPlayer && player.shape != Shape.SNAKE) {
-          showHint("You are too big to fit under the door");
+        if (forPlayer) {
+          if (player.shape != Shape.SNAKE) {
+            showHint("You are too big to fit under the door");
+            return false;
+          }
+        } else {
           return false;
         }
       }

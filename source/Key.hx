@@ -2,6 +2,6 @@ package;
 
 class Key extends MapObject {
   public function new(mapX: Int, mapY: Int) {
-    super(mapX, mapY, 12, 1);
+    super(mapX, mapY, MapObject.tilesetFrames(12, 1));
   }
 }

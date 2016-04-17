@@ -5,7 +5,7 @@ class Shifter extends MapObject {
   public var shape: Shape;
 
   public function new(mapX: Int, mapY: Int, shapeIndex: Int) {
-    super(mapX, mapY, 13, 4);
+    super(mapX, mapY, MapObject.tilesetFrames(13, 4));
 
     switch (shapeIndex) {
       case 0:

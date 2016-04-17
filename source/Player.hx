@@ -2,26 +2,37 @@ package;
 
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
+import flixel.graphics.frames.FlxTileFrames;
 import flixel.FlxObject;
 
 class Player extends MapObject {
 
   public var walking: Bool;
+  public var canStop: Bool = true;
   public var carried: Array<MapObject> = [];
   public var shape: Shape = Shape.HUMAN;
 
   public function new(mapX: Int, mapY: Int) {
-    super(mapX, mapY, 60, 40);
-    addAnimation("stand_left", [0], true);
-    addAnimation("walk_left", [1, 2], true);
-    addAnimation("stand_right", [0]);
-    addAnimation("walk_right", [1, 2]);
-    addAnimation("stand_up", [3]);
-    addAnimation("walk_up", [4, 5]);
-    addAnimation("stand_down", [6]);
-    addAnimation("walk_down", [7, 8]);
+    super(mapX, mapY, makeFrames());
+    addAnimation("stand_left", [10], true);
+    addAnimation("walk_left", [11, 12, 13, 14], true);
+    addAnimation("stand_right", [10]);
+    addAnimation("walk_right", [11, 12, 13, 14]);
+    addAnimation("stand_up", [5]);
+    addAnimation("walk_up", [6, 7, 8, 9]);
+    addAnimation("stand_down", [0]);
+    addAnimation("walk_down", [1, 2, 3, 4]);
     facing = FlxObject.DOWN;
     refresh();
+  }
+
+  private static function makeFrames(): FlxTileFrames {
+    return FlxTileFrames.combineTileFrames([
+      FlxTileFrames.fromRectangle("assets/images/human.png", Level.TILE_SIZE_POINT),
+      FlxTileFrames.fromRectangle("assets/images/bear.png", Level.TILE_SIZE_POINT),
+      FlxTileFrames.fromRectangle("assets/images/snake.png", Level.TILE_SIZE_POINT),
+      FlxTileFrames.fromRectangle("assets/images/human.png", Level.TILE_SIZE_POINT),
+    ]);
   }
 
   private override function addAnimation(name: String, frames: Array<Int>, ?flipX: Bool) {
@@ -33,9 +44,9 @@ class Player extends MapObject {
       return ret;
     }
     super.addAnimation("human_" + name, f(0), flipX);
-    super.addAnimation("bear_" + name, f(10), flipX);
-    super.addAnimation("snake_" + name, f(20), flipX);
-    super.addAnimation("unknown_" + name, f(30), flipX);
+    super.addAnimation("bear_" + name, f(15), flipX);
+    super.addAnimation("snake_" + name, f(30), flipX);
+    super.addAnimation("unknown_" + name, f(45), flipX);
   }
 
   public function moveTo(mapX: Int, mapY: Int) {
@@ -44,10 +55,10 @@ class Player extends MapObject {
     this.mapX = mapX;
     this.mapY = mapY;
     this.walking = true;
+    this.canStop = false;
     FlxTween.tween(this, {x: Level.TILE_SIZE * mapX, y: Level.TILE_SIZE * mapY}, 0.2, {
       onComplete: function(tween: FlxTween) {
-        this.walking = false;
-        refresh();
+        this.canStop = true;
       }
     });
 
@@ -69,7 +80,7 @@ class Player extends MapObject {
     refresh();
   }
 
-  private function refresh() {
+  public function refresh() {
     if (walking) {
       animation.play(shapePrefix() + "_walk_" + facingSuffix());
     } else {
