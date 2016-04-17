@@ -16,6 +16,7 @@ class Player extends MapObject {
   public var slow: Bool;
 
   private var walkSound: FlxSound;
+  private var shapeShiftSound: FlxSound;
 
   public function new(mapX: Int, mapY: Int) {
     super(mapX, mapY, makeFrames());
@@ -34,6 +35,11 @@ class Player extends MapObject {
     facing = FlxObject.DOWN;
     refresh();
     loadSound();
+    loadSounds();
+  }
+
+  private function loadSounds() {
+    shapeShiftSound = FlxG.sound.load("assets/sounds/shapeshift.wav");
   }
 
   private function loadSound() {
@@ -109,6 +115,7 @@ class Player extends MapObject {
   public function shiftShape(shape: Shape) {
     this.shape = shape;
     loadSound();
+    shapeShiftSound.play();
     haxe.Timer.delay(this.refresh, 100);
   }
 
