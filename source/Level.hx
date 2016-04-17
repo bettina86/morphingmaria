@@ -28,6 +28,7 @@ class Level extends FlxGroup {
   private var doors: FlxTypedGroup<Door> = new FlxTypedGroup<Door>();
   private var crates: FlxTypedGroup<Crate> = new FlxTypedGroup<Crate>();
   private var exits: FlxTypedGroup<Exit> = new FlxTypedGroup<Exit>();
+  private var shadows: FlxGroup = new FlxGroup();
   private var shifters: FlxTypedGroup<Shifter> = new FlxTypedGroup<Shifter>();
   private var hints: FlxGroup = new FlxGroup();
   private var overlay: FlxSprite;
@@ -39,10 +40,11 @@ class Level extends FlxGroup {
     var map = new TiledMap(filename);
     createTiles(cast map.getLayer("base"));
     createWires(cast map.getLayer("wires"));
-    add(doors);
+    add(shadows);
     add(exits);
     add(crates);
     createObjects(this.map);
+    add(doors);
     add(keys);
     add(shifters);
     add(hints);
@@ -119,6 +121,7 @@ class Level extends FlxGroup {
       case 11:
         player = new Player(mapX, mapY);
         add(player);
+        return false; // Keep tile.
       case 12:
         var exit = new Exit(mapX, mapY);
         exits.add(exit);
@@ -126,6 +129,8 @@ class Level extends FlxGroup {
         var key = new Key(mapX, mapY);
         keys.add(key);
       case 14|15|16|17:
+        var shadow = new MapObject(mapX, mapY, MapObject.tilesetFrames(type + 3, 1));
+        shadows.add(shadow);
         var shifter = new Shifter(mapX, mapY, type - 14);
         shifters.add(shifter);
       default:

@@ -17,7 +17,7 @@ class MapObject extends FlxSprite {
     this.frames = frames;
   }
 
-  private static function tilesetFrames(frameStart: Int, frameCount: Int): FlxTileFrames {
+  public static function tilesetFrames(frameStart: Int, frameCount: Int): FlxTileFrames {
     var x = frameStart % 10 * Level.TILE_SIZE;
     var y = Math.floor(frameStart / 10) * Level.TILE_SIZE;
     var nx = frameCount > 10 ? 10 : frameCount;

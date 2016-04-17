@@ -1,5 +1,8 @@
 package;
 
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+
 class Shifter extends MapObject {
 
   public var shape: Shape;
@@ -20,5 +23,8 @@ class Shifter extends MapObject {
 
     addAnimation("default", [shapeIndex]);
     animation.play("default");
+
+    this.y -= 0.5;
+    FlxTween.tween(this, {y: this.y - 2}, 1.5, {type: FlxTween.PINGPONG});
   }
 }
