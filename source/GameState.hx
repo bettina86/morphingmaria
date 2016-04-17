@@ -34,6 +34,8 @@ class GameState extends FlxState {
   private var exitLevelSound: FlxSound;
 
   override public function create() {
+    FlxG.keys.preventDefaultKeys = [UP, DOWN, LEFT, RIGHT];
+
     buttonDownSound = FlxG.sound.load("assets/sounds/click.ogg");
     buttonUpSound = FlxG.sound.load("assets/sounds/click2.ogg");
     enterLevelSound = FlxG.sound.load("assets/sounds/enter.ogg");
