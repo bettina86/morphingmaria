@@ -45,6 +45,7 @@ class GameState extends FlxState {
     add(hud);
     var tower = new FlxSprite(256, 0, "assets/images/tower.png");
     hud.add(tower);
+    addAbout();
     addRestartButton();
     addIntroButton();
 
@@ -54,8 +55,15 @@ class GameState extends FlxState {
     level.fadeIn();
   }
 
+  private function addAbout() {
+    var text = new FlxText(0, 0, 256, "Morphing Maria by @frozenfractal", 6);
+    text.alignment = CENTER;
+    text.alpha = 0.2;
+    hud.add(text);
+  }
+
   private function addRestartButton() {
-    var button = new FlxButton(256, 256 - 16, function() {
+    var button = new FlxButton(256, 256 - 32, function() {
       switchLevelWithFade(currentLevel);
     });
     button.loadGraphic("assets/images/level_button.png");
