@@ -37,6 +37,7 @@ class Level extends FlxGroup {
 
   private var takeKeySound: FlxSound;
   private var dropKeySound: FlxSound;
+  private var hintSound: FlxSound;
 
   public function new(basename: String) {
     super();
@@ -63,6 +64,7 @@ class Level extends FlxGroup {
   private function loadSounds() {
     takeKeySound = FlxG.sound.load("assets/sounds/take_key.wav");
     dropKeySound = FlxG.sound.load("assets/sounds/drop_key.wav");
+    hintSound = FlxG.sound.load("assets/sounds/hint.wav");
   }
 
   public function fadeIn(onComplete: Void -> Void = null) {
@@ -386,6 +388,8 @@ class Level extends FlxGroup {
     haxe.Timer.delay(function() {
       FlxTween.tween(text, {alpha: 0.0}, 1.0, {onComplete: function(tween: FlxTween) { hints.remove(text); }});
     }, 2000);
+
+    hintSound.play();
   }
 }
 

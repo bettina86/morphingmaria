@@ -13,6 +13,7 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import flixel.math.FlxPoint;
+import flixel.system.FlxSound;
 
 class GameState extends FlxState {
 
@@ -27,7 +28,17 @@ class GameState extends FlxState {
   private var level: Level;
   private var endingLevel: Bool;
 
+  private var buttonDownSound: FlxSound;
+  private var buttonUpSound: FlxSound;
+  private var enterLevelSound: FlxSound;
+  private var exitLevelSound: FlxSound;
+
   override public function create() {
+    buttonDownSound = FlxG.sound.load("assets/sounds/click.wav");
+    buttonUpSound = FlxG.sound.load("assets/sounds/click2.wav");
+    enterLevelSound = FlxG.sound.load("assets/sounds/enter.wav");
+    exitLevelSound = FlxG.sound.load("assets/sounds/exit.wav");
+
     world = new FlxGroup();
     add(world);
     hud = new FlxGroup();
@@ -48,6 +59,8 @@ class GameState extends FlxState {
     button.label = new FlxText(0, 0, 64, "Restart");
     button.label.alignment = CENTER;
     button.labelOffsets = [new FlxPoint(0, 1), new FlxPoint(0, 1), new FlxPoint(1, 2)];
+    button.onDown.sound = buttonDownSound;
+    button.onUp.sound = buttonUpSound;
     hud.add(button);
   }
 
@@ -67,6 +80,8 @@ class GameState extends FlxState {
         button.label = new FlxText(0, 0, 64, "Level " + number);
         button.label.alignment = CENTER;
         button.labelOffsets = [new FlxPoint(0, 1), new FlxPoint(0, 1), new FlxPoint(1, 2)];
+        button.onDown.sound = buttonDownSound;
+        button.onUp.sound = buttonUpSound;
 
         levelButtons[number] = button;
         hud.add(button);
@@ -92,6 +107,7 @@ class GameState extends FlxState {
     world.add(level);
     updateLevelButtons();
     save();
+    enterLevelSound.play();
   }
 
   private function switchLevelWithFade(number: Int, ?delay: Int = 0) {
@@ -112,6 +128,9 @@ class GameState extends FlxState {
     super.update(elapsed);
 
     if (level.finished) {
+      if (!endingLevel) {
+        exitLevelSound.play();
+      }
       switchLevelWithFade(currentLevel + 1, 500);
     }
   }
